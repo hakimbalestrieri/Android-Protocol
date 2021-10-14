@@ -10,6 +10,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Labo02">
         <activity
+            android:name=".GraphQLActivity"
+            android:exported="true" />
+        <activity
+            android:name=".CompressingActivity"
+            android:exported="true" />
+        <activity
+            android:name=".SerializationActivity"
+            android:exported="true" />
+        <activity
+            android:name=".DefferedActivity"
+            android:exported="true" />
+        <activity
+            android:name=".AsynchronousActivity"
+            android:exported="true" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
