@@ -1,4 +1,6 @@
-package ch.heigvd.iict.sym.lab.comm
+package ch.heigvd
+
+import ch.heigvd.iict.sym.lab.comm.CommunicationEventListener
 
 class SymComManager(var communicationEventListener: CommunicationEventListener? = null) {
 
