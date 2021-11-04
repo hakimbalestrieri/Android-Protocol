@@ -4,12 +4,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 
 /**
- * Activity in which is realized the point about the asynchronous transmissions
+ * Activity in which is realized the point of the laboratory about the deferred transmissions
  * @author Allemann, Balestrieri, Gomes
  */
-class AsynchronousActivity : AppCompatActivity() {
+class DeferredActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_asynchronous)
+        setContentView(R.layout.activity_deferred)
     }
 }

@@ -7,27 +7,27 @@
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/btn_asynchronous_activity"
+        android:id="@+id/btnAsynchronousActivity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
         android:text="Asynchronous Activity"
-        app:layout_constraintBottom_toTopOf="@+id/btnActivity2"
+        app:layout_constraintBottom_toTopOf="@+id/btnDeferredActivity"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/btnActivity2"
+        android:id="@+id/btnDeferredActivity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
-        android:text="Deffered Activity"
-        app:layout_constraintBottom_toTopOf="@+id/btnActivity3"
+        android:text="Deferred Activity"
+        app:layout_constraintBottom_toTopOf="@+id/btnSerializationActivity"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/btnActivity3"
+        android:id="@+id/btnSerializationActivity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Serialization Activity"
@@ -37,43 +37,43 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/btnActivity4"
+        android:id="@+id/btnCompressingActivity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:text="Compressing Activity"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnActivity3" />
+        app:layout_constraintTop_toBottomOf="@+id/btnSerializationActivity" />
 
     <Button
-        android:id="@+id/btnActivity5"
+        android:id="@+id/btnGraphQLActivity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:text="GraphQL Activity"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnActivity4" />
+        app:layout_constraintTop_toBottomOf="@+id/btnCompressingActivity" />
 
     <TextView
         android:id="@+id/txtLabo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Laboratoire 02"
+        android:text="HEIG-VD / SYM"
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnActivity5" />
+        app:layout_constraintTop_toBottomOf="@+id/btnGraphQLActivity" />
 
     <TextView
         android:id="@+id/txtTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Title"
+        android:text="Laboratoire 2"
         android:textSize="48sp"
-        app:layout_constraintBottom_toTopOf="@+id/btn_asynchronous_activity"
+        app:layout_constraintBottom_toTopOf="@+id/btnAsynchronousActivity"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
