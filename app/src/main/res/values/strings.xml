@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Labo-02</string>
+    <string name="api_txt">http://mobile.iict.ch/api/txt</string>
 </resources>
