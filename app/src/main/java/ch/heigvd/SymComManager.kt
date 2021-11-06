@@ -20,42 +20,37 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
      * @param request text to send
      */
     fun sendRequest(url: String, request: String) {
+        val handler = Handler(Looper.getMainLooper())
         Thread {
-            val handler = Handler(Looper.getMainLooper())
-            handler.post(object : Runnable {
-                override fun run() {
-                    val url = URL(url)
-                    val connection = url.openConnection() as HttpURLConnection
-                    connection.requestMethod = "POST"
-                    connection.connectTimeout = 300000
-                    connection.connectTimeout = 300000
-                    connection.doOutput = true
-                    connection.doInput = true
+            // Connection configuration
+            val url = URL(url)
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "POST"
+            connection.doOutput = true
+            connection.doInput = true
 
-                    val postData: ByteArray = request.toByteArray(StandardCharsets.UTF_8)
+            // Headers of the request
+            val postData: ByteArray = request.toByteArray(StandardCharsets.UTF_8)
+            connection.setRequestProperty("charset", "utf-8")
+            connection.setRequestProperty("Content-length", postData.size.toString())
+            connection.setRequestProperty("Content-Type", "text/plain")
 
-                    connection.setRequestProperty("charset", "utf-8")
-                    connection.setRequestProperty("Content-length", postData.size.toString())
-                    connection.setRequestProperty("Content-Type", "text/plain")
+            // Send the text
+            val outputStream = DataOutputStream(connection.outputStream)
+            outputStream.write(postData)
+            outputStream.flush()
 
-                    try {
-                        val outputStream = DataOutputStream(connection.outputStream)
-                        outputStream.write(postData)
-                        outputStream.flush()
-                        if (connection.responseCode == HttpURLConnection.HTTP_OK) {
-                            try {
-                                val inputStream = DataInputStream(connection.inputStream)
-                                val reader = BufferedReader(InputStreamReader(inputStream))
-                                val output: String = reader.readLine()
-                                communicationEventListener.handleServerResponse(output)
-                            } catch (exception: Exception) {
-                                throw Exception("Exception while push the notification  $exception.message")
-                            }
-                        }
-                    } catch (exception: Exception) {
-                    }
-                }
-            })
+            // Check if the request was handled successfully
+            if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+
+                // Read body of the response
+                val inputStream = DataInputStream(connection.inputStream)
+                val reader = BufferedReader(InputStreamReader(inputStream))
+                val output: String = reader.readLine()
+
+                // Send back the data to the activity
+                handler.post { communicationEventListener.handleServerResponse(output) }
+            }
         }.start()
     }
 }
