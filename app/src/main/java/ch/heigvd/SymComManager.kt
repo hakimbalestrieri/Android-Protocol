@@ -18,8 +18,9 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
      * Send request text to the server designated by url
      * @param url where to send the request
      * @param request text to send
+     * @param contentType content type of the request body
      */
-    fun sendRequest(url: String, request: String) {
+    fun sendRequest(url: String, request: String, contentType: String) {
         val handler = Handler(Looper.getMainLooper())
         Thread {
             // Connection configuration
@@ -33,7 +34,7 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
             val postData: ByteArray = request.toByteArray(StandardCharsets.UTF_8)
             connection.setRequestProperty("charset", "utf-8")
             connection.setRequestProperty("Content-length", postData.size.toString())
-            connection.setRequestProperty("Content-Type", "text/plain")
+            connection.setRequestProperty("Content-Type", contentType)
 
             // Send the text
             val outputStream = DataOutputStream(connection.outputStream)

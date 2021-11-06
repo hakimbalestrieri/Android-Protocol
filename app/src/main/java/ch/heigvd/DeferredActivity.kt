@@ -26,7 +26,7 @@ class DeferredActivity : AppCompatActivity() {
             mainHandler.postDelayed(this, TIMER_DELAY)
         }
     }
-    private lateinit var adapter : ArrayAdapter<String>
+    private lateinit var adapter: ArrayAdapter<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,10 +44,14 @@ class DeferredActivity : AppCompatActivity() {
 
         // Adding listener on button to send data
         binding.btnSend.setOnClickListener {
-            stringsToSend.add(binding.tbxText.text.toString())
-            binding.tbxText.text.clear()
+            val text = binding.tbxText.text.toString()
+            if (text != "") {
+                stringsToSend.add(text)
+                binding.tbxText.text.clear()
+            }
         }
 
+        // Add adapter to the list view
         adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, logs)
         binding.listLogs.adapter = adapter;
     }

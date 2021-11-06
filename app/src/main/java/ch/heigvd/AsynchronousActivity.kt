@@ -29,8 +29,11 @@ class AsynchronousActivity : AppCompatActivity() {
 
         // Adding listener on button to send data
         binding.btnSend.setOnClickListener {
-            mcm.sendRequest(getString(R.string.api_txt), binding.tbxText.text.toString())
-            binding.tbxText.text.clear()
+            val text = binding.tbxText.text.toString()
+            if (text != "") {
+                mcm.sendRequest(getString(R.string.api_txt), text, "text/plain")
+                binding.tbxText.text.clear()
+            }
         }
     }
 }
