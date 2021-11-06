@@ -36,6 +36,7 @@ class DeferredActivity : AppCompatActivity() {
         binding = ActivityDeferredBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Handler to delay action on main thread
         mainHandler = Handler(Looper.getMainLooper())
         Thread {
             updateTextTask.run()
