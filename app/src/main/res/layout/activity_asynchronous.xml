@@ -8,7 +8,7 @@
     tools:context=".AsynchronousActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/SendTextLayout"
+        android:id="@+id/LogsLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
@@ -59,10 +59,10 @@
         android:layout_marginEnd="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/SendTextLayout">
+        app:layout_constraintTop_toBottomOf="@+id/LogsLayout">
 
         <TextView
-            android:id="@+id/txtResultHeader"
+            android:id="@+id/txtLogsHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Réception"
@@ -75,7 +75,7 @@
             android:layout_marginTop="20dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/txtResultHeader" />
+            app:layout_constraintTop_toBottomOf="@+id/txtLogsHeader" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
