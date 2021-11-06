@@ -56,6 +56,8 @@ class DeferredActivity : AppCompatActivity() {
      * Send the data
      */
     private fun sendData() {
+        // Note : Here, we could imagine sending the data to the server,
+        // waiting for a response and then updating the UI.
         stringsToSend.forEach { logs.add(it) }
         adapter.notifyDataSetChanged()
         stringsToSend.clear()
