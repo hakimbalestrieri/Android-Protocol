@@ -27,7 +27,7 @@ class AsynchronousActivity : AppCompatActivity() {
             }
         })
 
-        // Adding listeners on buttons to navigate through activities
+        // Adding listener on button to send data
         binding.btnSend.setOnClickListener {
             mcm.sendRequest(getString(R.string.api_txt), binding.tbxText.text.toString())
         }
