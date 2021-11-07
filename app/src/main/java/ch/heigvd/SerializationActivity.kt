@@ -38,11 +38,9 @@ class SerializationActivity : AppCompatActivity() {
         // Adding listener on button to send data
         binding.btnSendAsJSON.setOnClickListener {
             if (validateFormAndGetPerson()) {
-                val person = getPerson()
-                val string = Json.encodeToString(person)
                 mcm.sendRequest(
                     getString(R.string.api_txt),
-                    Json.encodeToString(string),
+                    Json.encodeToString(getPerson()),
                     "application/json"
                 )
                 resetForm()
@@ -110,6 +108,7 @@ class SerializationActivity : AppCompatActivity() {
      * Reset form fields
      */
     private fun resetForm() {
+        binding.tbxName.text.clear()
         binding.tbxFirstName.text.clear()
         binding.tbxMiddleName.text.clear()
         binding.tbxHomeNumber.text.clear()

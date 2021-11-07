@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Labo-02</string>
     <string name="api_txt">http://mobile.iict.ch/api/txt</string>
+    <string name="api_json">http://mobile.iict.ch/api/json</string>
+    <string name="api_xml">http://mobile.iict.ch/api/xml</string>
+    <string name="api_protobuf">http://mobile.iict.ch/api/protobuf</string>
 </resources>
