@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option java_package = "ch.heigvd.iict.sym.protobuf";
+
+message Directory {
+	repeated Person results = 1;
+}
+
+message Person {
+	string name = 1;
+	string firstname = 2;
+	string middlename = 3;
+	repeated Phone phone = 4;
+}
+
+message Phone {
+	enum Type {
+		HOME = 0;
+		MOBILE = 1;
+		WORK = 2;
+	}
+	Type type = 1;
+	string number = 2;
+}

@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import ch.heigvd.databinding.ActivitySerializationBinding
 import ch.heigvd.iict.sym.lab.comm.CommunicationEventListener
+import ch.heigvd.iict.sym.protobuf.DirectoryOuterClass
 import ch.heigvd.model.Directory
 import ch.heigvd.model.SimplePerson
 import ch.heigvd.model.Person
@@ -73,6 +74,28 @@ class SerializationActivity : AppCompatActivity() {
             }
             resetForm()
         }
+
+
+        // Adding listener on button to send Protobuf data
+        binding.btnSendAsJSON.setOnClickListener {
+            contentTypeSent = "application/protobuf"
+
+            val person = getPerson()
+            //TODO : Comprendre comment utiliser Builder des classes genérés
+            //Directory.
+            /*mcm.sendRequest(
+                getString(R.string.api_json),
+                Json.encodeToString(
+                    SimplePerson(
+                        binding.tbxName.text.toString(),
+                        binding.tbxFirstName.text.toString()
+                    )
+                ),
+                contentTypeSent
+            )
+            resetForm()*/
+        }
+
     }
 
     /**
