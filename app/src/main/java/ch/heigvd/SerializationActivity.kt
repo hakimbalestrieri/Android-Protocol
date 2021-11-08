@@ -2,10 +2,9 @@ package ch.heigvd
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.ArrayAdapter
 import ch.heigvd.databinding.ActivitySerializationBinding
 import ch.heigvd.iict.sym.lab.comm.CommunicationEventListener
-import ch.heigvd.model.Directory
+import ch.heigvd.model.SimplePerson
 import ch.heigvd.model.Person
 import ch.heigvd.model.Phone
 import kotlinx.serialization.json.Json
@@ -17,8 +16,6 @@ import kotlinx.serialization.encodeToString
  */
 class SerializationActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySerializationBinding
-    private lateinit var adapter: ArrayAdapter<String>
-    private val logs = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,27 +28,27 @@ class SerializationActivity : AppCompatActivity() {
         // Handle response of SymComManager and update UI
         val mcm = SymComManager(object : CommunicationEventListener {
             override fun handleServerResponse(response: String) {
-                logs.add(response)
-                adapter.notifyDataSetChanged()
+                val result = Json.decodeFromString(SimplePerson.serializer(), response);
+                binding.txtResult.text = result.toString()
             }
         })
 
         // Adding listener on button to send data
         binding.btnSendAsJSON.setOnClickListener {
-            if (validateFormAndGetPerson()) {
-                mcm.sendRequest(
-                    getString(R.string.api_json),
-                    Json.encodeToString(getPerson()),
-                    "application/json"
-                )
-                resetForm()
-            }
+            mcm.sendRequest(
+                getString(R.string.api_json),
+                Json.encodeToString(
+                    SimplePerson(
+                        binding.tbxName.text.toString(),
+                        binding.tbxFirstName.text.toString()
+                    )
+                ),
+                "application/json"
+            )
+            resetForm()
         }
-
-        // Add adapter to the list view
-        adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, logs)
-        binding.listLogs.adapter = adapter;
     }
+
 
     /**
      * Validate that required fields are not empty
