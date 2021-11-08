@@ -17,8 +17,8 @@ import kotlinx.serialization.encodeToString
  */
 class SerializationActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySerializationBinding
-    private lateinit var adapter: ArrayAdapter<Person>
-    private val directory = Directory()
+    private lateinit var adapter: ArrayAdapter<String>
+    private val logs = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +31,8 @@ class SerializationActivity : AppCompatActivity() {
         // Handle response of SymComManager and update UI
         val mcm = SymComManager(object : CommunicationEventListener {
             override fun handleServerResponse(response: String) {
-                println(response)
+                logs.add(response)
+                adapter.notifyDataSetChanged()
             }
         })
 
@@ -39,7 +40,7 @@ class SerializationActivity : AppCompatActivity() {
         binding.btnSendAsJSON.setOnClickListener {
             if (validateFormAndGetPerson()) {
                 mcm.sendRequest(
-                    getString(R.string.api_txt),
+                    getString(R.string.api_json),
                     Json.encodeToString(getPerson()),
                     "application/json"
                 )
@@ -48,7 +49,7 @@ class SerializationActivity : AppCompatActivity() {
         }
 
         // Add adapter to the list view
-        adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, directory.people)
+        adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, logs)
         binding.listLogs.adapter = adapter;
     }
 
