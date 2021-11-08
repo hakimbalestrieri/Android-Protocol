@@ -47,10 +47,15 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
                 // Read body of the response
                 val inputStream = DataInputStream(connection.inputStream)
                 val reader = BufferedReader(InputStreamReader(inputStream))
-                val output: String = reader.readLine()
+                var result = ""
+                var output: String? = reader.readLine()
+                while(output != null) {
+                    result += output
+                    output = reader.readLine()
+                }
 
                 // Send back the data to the activity
-                handler.post { communicationEventListener.handleServerResponse(output) }
+                handler.post { communicationEventListener.handleServerResponse(result) }
             }
         }.start()
     }

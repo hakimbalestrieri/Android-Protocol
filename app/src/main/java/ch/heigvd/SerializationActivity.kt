@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import ch.heigvd.databinding.ActivitySerializationBinding
 import ch.heigvd.iict.sym.lab.comm.CommunicationEventListener
+import ch.heigvd.model.Directory
 import ch.heigvd.model.SimplePerson
 import ch.heigvd.model.Person
 import ch.heigvd.model.Phone
@@ -16,6 +17,8 @@ import kotlinx.serialization.encodeToString
  */
 class SerializationActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySerializationBinding
+    private var directory = Directory()
+    private var contentTypeSent = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,13 +31,20 @@ class SerializationActivity : AppCompatActivity() {
         // Handle response of SymComManager and update UI
         val mcm = SymComManager(object : CommunicationEventListener {
             override fun handleServerResponse(response: String) {
-                val result = Json.decodeFromString(SimplePerson.serializer(), response);
-                binding.txtResult.text = result.toString()
+                println(response)
+                if (contentTypeSent == "application/json") {
+                    val result = Json.decodeFromString(SimplePerson.serializer(), response);
+                    binding.txtResult.text = result.toString()
+                }
+                else if (contentTypeSent == "application/xml") {
+                    val directory = Directory.parseXML(response)
+                }
             }
         })
 
-        // Adding listener on button to send data
+        // Adding listener on button to send JSON data
         binding.btnSendAsJSON.setOnClickListener {
+            contentTypeSent = "application/json"
             mcm.sendRequest(
                 getString(R.string.api_json),
                 Json.encodeToString(
@@ -43,18 +53,33 @@ class SerializationActivity : AppCompatActivity() {
                         binding.tbxFirstName.text.toString()
                     )
                 ),
-                "application/json"
+                contentTypeSent
             )
             resetForm()
         }
-    }
 
+        // Adding listener on button to send XML data
+        binding.btnSendXML.setOnClickListener {
+            if (validateForm()) {
+                contentTypeSent = "application/xml"
+                val person = getPerson()
+                directory.people.add(person)
+                val xml = getString(R.string.xml_header) + directory.serializeToXML()
+                mcm.sendRequest(
+                    getString(R.string.api_xml),
+                    xml,
+                    contentTypeSent
+                )
+            }
+            resetForm()
+        }
+    }
 
     /**
      * Validate that required fields are not empty
      * Return if the form is valid or not
      */
-    private fun validateFormAndGetPerson(): Boolean {
+    private fun validateForm(): Boolean {
         if (binding.tbxName.text.toString() == "") {
             binding.tbxName.error = "This field is required"
             return false
@@ -87,11 +112,11 @@ class SerializationActivity : AppCompatActivity() {
 
         // Form is well filled, return person
         val phones = mutableListOf<Phone>()
-        val homePhone = if (homeNumber == "") null else Phone(Phone.Type.HOME, homeNumber)
+        val homePhone = if (homeNumber == "") null else Phone(Phone.Type.home, homeNumber)
         if (homePhone != null) phones.add(homePhone)
-        val mobilePhone = if (mobileNumber == "") null else Phone(Phone.Type.MOBILE, mobileNumber)
+        val mobilePhone = if (mobileNumber == "") null else Phone(Phone.Type.mobile, mobileNumber)
         if (mobilePhone != null) phones.add(mobilePhone)
-        val workPhone = if (workNumber == "") null else Phone(Phone.Type.WORK, workNumber)
+        val workPhone = if (workNumber == "") null else Phone(Phone.Type.work, workNumber)
         if (workPhone != null) phones.add(workPhone)
 
         return Person(
