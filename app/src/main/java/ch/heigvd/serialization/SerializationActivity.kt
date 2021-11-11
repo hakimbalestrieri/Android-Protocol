@@ -6,6 +6,7 @@ import ch.heigvd.CommunicationEventListener
 import ch.heigvd.R
 import ch.heigvd.SymComManager
 import ch.heigvd.databinding.ActivitySerializationBinding
+import ch.heigvd.serialization.protobuf.DirectoryOuterClass
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
 
@@ -65,26 +66,45 @@ class SerializationActivity : AppCompatActivity() {
         }
 
         // Adding listener on button to send Protobuf data
-        binding.btnSendAsJSON.setOnClickListener {
-            val person = getXMLPerson()
-            //TODO : Comprendre comment utiliser Builder des classes genérés
-            /*//Directory.
+        binding.btnSendAsProtoBuf.setOnClickListener {
+
+            val person = getXMLPerson() //TODO : getXML ? getString plutôt non ?
+
+            val protobufOut = DirectoryOuterClass.Person.newBuilder().setFirstname(person.firstname)
+                .setMiddlename(person.middlename).setName(person.name)
+
+
+            var typeProtobuf : DirectoryOuterClass.Phone.Type
+            typeProtobuf = DirectoryOuterClass.Phone.Type.HOME //Demande une init
+
+            for(i in person.phone) {
+
+                when (i.type.toString()) {
+                    "home" ->  typeProtobuf = DirectoryOuterClass.Phone.Type.HOME
+                    "mobile" -> typeProtobuf = DirectoryOuterClass.Phone.Type.MOBILE
+                    "work" -> typeProtobuf = DirectoryOuterClass.Phone.Type.WORK
+                }
+
+                protobufOut.addPhoneBuilder().setNumber(i.number).setType(typeProtobuf)
+            }
+
+            //Affichage
+            println(protobufOut.build())
+
             SymComManager(object : CommunicationEventListener {
                 override fun handleServerResponse(response: String) {
-                    // TODO : Parse proto buf response
+                    //val directory = Directory.parseXML(response)
+                    println(response);
                 }
             }).sendRequest(
-                getString(R.string.api_json),
-                Json.encodeToString(
-                    SimplePerson(
-                        binding.tbxName.text.toString(),
-                        binding.tbxFirstName.text.toString()
-                    )
-                ),
+                getString(R.string.api_protobuf),
+                protobufOut.build().toString(),
                 "application/protobuf"
-            )*/
+            )
             resetForm()
+
         }
+
     }
 
     /**
