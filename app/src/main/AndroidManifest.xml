@@ -13,19 +13,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Labo02">
         <activity
-            android:name=".GraphQLActivity"
+            android:name=".graphql.GraphQLActivity"
             android:exported="true" />
         <activity
-            android:name=".CompressingActivity"
+            android:name=".compressing.CompressingActivity"
             android:exported="true" />
         <activity
-            android:name=".SerializationActivity"
+            android:name=".serialization.SerializationActivity"
             android:exported="true" />
         <activity
-            android:name=".DeferredActivity"
+            android:name=".deffered.DeferredActivity"
             android:exported="true" />
         <activity
-            android:name=".AsynchronousActivity"
+            android:name=".asynchronous.AsynchronousActivity"
             android:exported="true" />
         <activity
             android:name=".MainActivity"

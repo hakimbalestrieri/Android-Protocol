@@ -1,14 +1,11 @@
-package ch.heigvd
+package ch.heigvd.serialization
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import ch.heigvd.CommunicationEventListener
+import ch.heigvd.R
+import ch.heigvd.SymComManager
 import ch.heigvd.databinding.ActivitySerializationBinding
-import ch.heigvd.iict.sym.lab.comm.CommunicationEventListener
-import ch.heigvd.iict.sym.protobuf.DirectoryOuterClass
-import ch.heigvd.model.Directory
-import ch.heigvd.model.SimplePerson
-import ch.heigvd.model.Person
-import ch.heigvd.model.Phone
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
 
@@ -19,7 +16,6 @@ import kotlinx.serialization.encodeToString
 class SerializationActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySerializationBinding
     private var directory = Directory()
-    private var contentTypeSent = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,24 +25,14 @@ class SerializationActivity : AppCompatActivity() {
         binding = ActivitySerializationBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Handle response of SymComManager and update UI
-        val mcm = SymComManager(object : CommunicationEventListener {
-            override fun handleServerResponse(response: String) {
-                println(response)
-                if (contentTypeSent == "application/json") {
-                    val result = Json.decodeFromString(SimplePerson.serializer(), response);
-                    binding.txtResult.text = result.toString()
-                }
-                else if (contentTypeSent == "application/xml") {
-                    val directory = Directory.parseXML(response)
-                }
-            }
-        })
-
         // Adding listener on button to send JSON data
         binding.btnSendAsJSON.setOnClickListener {
-            contentTypeSent = "application/json"
-            mcm.sendRequest(
+            SymComManager(object : CommunicationEventListener {
+                override fun handleServerResponse(response: String) {
+                    val result = Json.decodeFromString(SimplePerson.serializer(), response)
+                    binding.txtResult.text = result.toString()
+                }
+            }).sendRequest(
                 getString(R.string.api_json),
                 Json.encodeToString(
                     SimplePerson(
@@ -54,7 +40,7 @@ class SerializationActivity : AppCompatActivity() {
                         binding.tbxFirstName.text.toString()
                     )
                 ),
-                contentTypeSent
+                "application/json"
             )
             resetForm()
         }
@@ -62,14 +48,17 @@ class SerializationActivity : AppCompatActivity() {
         // Adding listener on button to send XML data
         binding.btnSendXML.setOnClickListener {
             if (validateForm()) {
-                contentTypeSent = "application/xml"
-                val person = getPerson()
+                val person = getXMLPerson()
                 directory.people.add(person)
                 val xml = getString(R.string.xml_header) + directory.serializeToXML()
-                mcm.sendRequest(
+                SymComManager(object : CommunicationEventListener {
+                    override fun handleServerResponse(response: String) {
+                        val directory = Directory.parseXML(response)
+                    }
+                }).sendRequest(
                     getString(R.string.api_xml),
                     xml,
-                    contentTypeSent
+                    "application/xml"
                 )
             }
             resetForm()
@@ -78,12 +67,14 @@ class SerializationActivity : AppCompatActivity() {
 
         // Adding listener on button to send Protobuf data
         binding.btnSendAsJSON.setOnClickListener {
-            contentTypeSent = "application/protobuf"
-
-            val person = getPerson()
+            val person = getXMLPerson()
             //TODO : Comprendre comment utiliser Builder des classes genérés
-            //Directory.
-            /*mcm.sendRequest(
+            /*//Directory.
+            SymComManager(object : CommunicationEventListener {
+                override fun handleServerResponse(response: String) {
+                    // TODO : Parse proto buf response
+                }
+            }).sendRequest(
                 getString(R.string.api_json),
                 Json.encodeToString(
                     SimplePerson(
@@ -91,11 +82,10 @@ class SerializationActivity : AppCompatActivity() {
                         binding.tbxFirstName.text.toString()
                     )
                 ),
-                contentTypeSent
-            )
-            resetForm()*/
+                "application/protobuf"
+            )*/
+            resetForm()
         }
-
     }
 
     /**
@@ -126,7 +116,7 @@ class SerializationActivity : AppCompatActivity() {
     /**
      * Get the person matching form data
      */
-    private fun getPerson(): Person {
+    private fun getXMLPerson(): Person {
         // Data retrieval
         val middlename = binding.tbxMiddleName.text.toString()
         val homeNumber = binding.tbxHomeNumber.text.toString()

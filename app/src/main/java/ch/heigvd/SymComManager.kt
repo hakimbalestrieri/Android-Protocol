@@ -2,11 +2,14 @@ package ch.heigvd
 
 import android.os.Handler
 import android.os.Looper
-import ch.heigvd.iict.sym.lab.comm.CommunicationEventListener
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.charset.StandardCharsets
+import java.util.zip.Deflater
+import java.util.zip.Deflater.DEFLATED
+import java.util.zip.DeflaterOutputStream
+import java.util.zip.InflaterInputStream
 
 /**
  * Asynchronous transmission service
@@ -19,13 +22,19 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
      * @param url where to send the request
      * @param request text to send
      * @param contentType content type of the request body
+     * @param headers additional headers
      */
-    fun sendRequest(url: String, request: String, contentType: String) {
+    fun sendRequest(
+        url: String,
+        request: String,
+        contentType: String,
+        headers: Map<String, String>? = null,
+        compress: Boolean = false
+    ) {
         val handler = Handler(Looper.getMainLooper())
         Thread {
             // Connection configuration
-            val url = URL(url)
-            val connection = url.openConnection() as HttpURLConnection
+            val connection = URL(url).openConnection() as HttpURLConnection
             connection.requestMethod = "POST"
             connection.doOutput = true
             connection.doInput = true
@@ -33,11 +42,15 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
             // Headers of the request
             val postData: ByteArray = request.toByteArray(StandardCharsets.UTF_8)
             connection.setRequestProperty("charset", "utf-8")
-            connection.setRequestProperty("Content-length", postData.size.toString())
+//            connection.setRequestProperty("Content-length", postData.size.toString())
             connection.setRequestProperty("Content-Type", contentType)
+            headers?.forEach { (k, v) -> connection.setRequestProperty(k, v) }
 
             // Send the text
-            val outputStream = DataOutputStream(connection.outputStream)
+            var outputStream = DataOutputStream(connection.outputStream) as OutputStream
+            if (compress) {
+                outputStream = DeflaterOutputStream(outputStream, Deflater(DEFLATED, true))
+            }
             outputStream.write(postData)
             outputStream.flush()
 
@@ -45,11 +58,16 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
             if (connection.responseCode == HttpURLConnection.HTTP_OK) {
 
                 // Read body of the response
-                val inputStream = DataInputStream(connection.inputStream)
+                var inputStream = DataInputStream(connection.inputStream) as InputStream
+                val compressed = connection.headerFields["X-Content-Encoding"]
+                if (compressed != null && compressed[0] == "deflate") {
+                    inputStream = InflaterInputStream(inputStream)
+                }
+
                 val reader = BufferedReader(InputStreamReader(inputStream))
                 var result = ""
                 var output: String? = reader.readLine()
-                while(output != null) {
+                while (output != null) {
                     result += output
                     output = reader.readLine()
                 }

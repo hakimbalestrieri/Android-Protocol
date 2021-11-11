@@ -1,15 +1,16 @@
-package ch.heigvd
+package ch.heigvd.graphql
 
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
+import ch.heigvd.CommunicationEventListener
+import ch.heigvd.R
+import ch.heigvd.SymComManager
 import ch.heigvd.databinding.ActivityGraphQlactivityBinding
-import ch.heigvd.iict.sym.lab.comm.CommunicationEventListener
-import ch.heigvd.model.Author
-import ch.heigvd.model.Book
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 
 
 /**
@@ -34,16 +35,18 @@ class GraphQLActivity : AppCompatActivity() {
         // Load asynchronously authors
         SymComManager(object : CommunicationEventListener {
             override fun handleServerResponse(response: String) {
-                // TODO : Dégeulasse
                 val authorsArray =
-                    response.substring(response.indexOf("[") + 1, response.indexOf("]")).split(",")
-                authorsArray.forEach { authors.add(Json.decodeFromString(Author.serializer(), it)) }
+                    response.substring(response.indexOf("["), response.indexOf("]") + 1)
+                val authorsAsJsonArray = Json.parseToJsonElement(authorsArray) as JsonArray
+                authorsAsJsonArray.forEach {
+                    authors.add(Json.decodeFromJsonElement(Author.serializer(), it))
+                }
                 authorsAdapter.notifyDataSetChanged()
             }
         }).sendRequest(
-            // TODO : Limiter la réponse... 2000 enregistrements...
+            // TODO : Limiter la réponse ? 2000 enregistrements...
             getString(R.string.api_graphql),
-            "{\"query\": \"{findAllAuthors{name}}\"}",
+            "{\"query\": \"{findAllAuthors{id, name}}\"}",
             "application/json"
         )
 
@@ -64,13 +67,15 @@ class GraphQLActivity : AppCompatActivity() {
                 SymComManager(object : CommunicationEventListener {
                     override fun handleServerResponse(response: String) {
                         books.clear()
-                        // TODO : Dégeulasse
                         val booksArray =
-                            response.substring(response.indexOf("[") + 1, response.indexOf("]"))
-                                .split(",")
-                        booksArray.forEach {
+                            response.substring(
+                                response.indexOf("["),
+                                response.indexOf("]") + 1
+                            )
+                        val booksAsJsonArray = Json.parseToJsonElement(booksArray) as JsonArray
+                        booksAsJsonArray.forEach {
                             books.add(
-                                Json.decodeFromString(
+                                Json.decodeFromJsonElement(
                                     Book.serializer(),
                                     it
                                 )
@@ -79,9 +84,9 @@ class GraphQLActivity : AppCompatActivity() {
                         booksAdapter.notifyDataSetChanged()
                     }
                 }).sendRequest(
-                    // TODO : Limiter la réponse...
+                    // TODO : Limiter la réponse ?
                     getString(R.string.api_graphql),
-                    "{\"query\": \"{findAuthorById(id: 1){books{title}}}\"}\n",
+                    "{\"query\": \"{findAuthorById(id: " + authors[position].id + "){books{title}}}\"}\n",
                     "application/json"
                 )
             }

@@ -5,7 +5,7 @@
     android:id="@+id/MainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AsynchronousActivity">
+    tools:context=".asynchronous.AsynchronousActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/LogsLayout"

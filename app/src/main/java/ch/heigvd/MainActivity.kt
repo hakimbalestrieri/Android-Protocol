@@ -3,7 +3,12 @@ package ch.heigvd
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import ch.heigvd.graphql.GraphQLActivity
+import ch.heigvd.serialization.SerializationActivity
+import ch.heigvd.asynchronous.AsynchronousActivity
+import ch.heigvd.compressing.CompressingActivity
 import ch.heigvd.databinding.ActivityMainBinding
+import ch.heigvd.deffered.DeferredActivity
 
 /**
  * Main activity from which user can navigate to other activities

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option java_package = "ch.heigvd.iict.sym.protobuf";
+option java_package = "ch.heigvd.Serialization.protobuf";
 
 message Directory {
 	repeated Person results = 1;

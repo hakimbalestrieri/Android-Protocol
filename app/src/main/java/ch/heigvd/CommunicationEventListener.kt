@@ -1,4 +1,4 @@
-package ch.heigvd.iict.sym.lab.comm
+package ch.heigvd
 
 interface CommunicationEventListener {
     fun handleServerResponse(response :String)

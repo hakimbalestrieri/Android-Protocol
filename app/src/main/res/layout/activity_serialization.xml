@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SerializationActivity">
+    tools:context=".serialization.SerializationActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/LogsLayout"
@@ -141,7 +141,7 @@
             android:id="@+id/txtLogsHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Logs"
+            android:text="Objet parsé"
             android:textSize="24sp" />
 
         <TextView

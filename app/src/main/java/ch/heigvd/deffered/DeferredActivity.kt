@@ -1,10 +1,11 @@
-package ch.heigvd
+package ch.heigvd.deffered
 
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
+import ch.heigvd.R
 import ch.heigvd.databinding.ActivityDeferredBinding
 
 /**

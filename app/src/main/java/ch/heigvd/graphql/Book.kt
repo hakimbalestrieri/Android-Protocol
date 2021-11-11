@@ -1,4 +1,4 @@
-package ch.heigvd.model
+package ch.heigvd.graphql
 
 import kotlinx.serialization.Serializable
 
