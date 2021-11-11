@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets
 import java.util.zip.Deflater
 import java.util.zip.Deflater.DEFLATED
 import java.util.zip.DeflaterOutputStream
+import java.util.zip.Inflater
 import java.util.zip.InflaterInputStream
 
 /**
@@ -42,7 +43,6 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
             // Headers of the request
             val postData: ByteArray = request.toByteArray(StandardCharsets.UTF_8)
             connection.setRequestProperty("charset", "utf-8")
-//            connection.setRequestProperty("Content-length", postData.size.toString())
             connection.setRequestProperty("Content-Type", contentType)
             headers?.forEach { (k, v) -> connection.setRequestProperty(k, v) }
 
@@ -52,7 +52,7 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
                 outputStream = DeflaterOutputStream(outputStream, Deflater(DEFLATED, true))
             }
             outputStream.write(postData)
-            outputStream.flush()
+            outputStream.close()
 
             // Check if the request was handled successfully
             if (connection.responseCode == HttpURLConnection.HTTP_OK) {
@@ -60,8 +60,8 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
                 // Read body of the response
                 var inputStream = DataInputStream(connection.inputStream) as InputStream
                 val compressed = connection.headerFields["X-Content-Encoding"]
-                if (compressed != null && compressed[0] == "deflate") {
-                    inputStream = InflaterInputStream(inputStream)
+                if (compressed != null && compressed[0] == "DEFLATE") {
+                    inputStream = InflaterInputStream(inputStream, Inflater(true))
                 }
 
                 val reader = BufferedReader(InputStreamReader(inputStream))

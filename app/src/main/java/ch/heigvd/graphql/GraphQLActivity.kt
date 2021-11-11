@@ -12,7 +12,6 @@ import ch.heigvd.databinding.ActivityGraphQlactivityBinding
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 
-
 /**
  * Activity in which is realized the point of the laboratory about Graph QL
  * @author Allemann, Balestrieri, Gomes
@@ -44,7 +43,6 @@ class GraphQLActivity : AppCompatActivity() {
                 authorsAdapter.notifyDataSetChanged()
             }
         }).sendRequest(
-            // TODO : Limiter la réponse ? 2000 enregistrements...
             getString(R.string.api_graphql),
             "{\"query\": \"{findAllAuthors{id, name}}\"}",
             "application/json"
@@ -84,7 +82,6 @@ class GraphQLActivity : AppCompatActivity() {
                         booksAdapter.notifyDataSetChanged()
                     }
                 }).sendRequest(
-                    // TODO : Limiter la réponse ?
                     getString(R.string.api_graphql),
                     "{\"query\": \"{findAuthorById(id: " + authors[position].id + "){books{title}}}\"}\n",
                     "application/json"

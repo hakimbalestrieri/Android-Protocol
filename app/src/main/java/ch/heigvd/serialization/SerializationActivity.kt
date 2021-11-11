@@ -64,7 +64,6 @@ class SerializationActivity : AppCompatActivity() {
             resetForm()
         }
 
-
         // Adding listener on button to send Protobuf data
         binding.btnSendAsJSON.setOnClickListener {
             val person = getXMLPerson()
