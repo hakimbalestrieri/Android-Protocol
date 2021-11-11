@@ -86,6 +86,7 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
             connection.doInput = true
 
             // Headers of the request
+            // TODO : OutputStreamWriter(BufferedOutputStream(conn.output), "UTF-8"))
             val postData: ByteArray = request.toByteArray(StandardCharsets.UTF_8)
             connection.setRequestProperty("charset", "utf-8")
             connection.setRequestProperty("Content-Type", contentType)
