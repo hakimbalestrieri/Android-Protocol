@@ -62,7 +62,9 @@ class DeferredActivity : AppCompatActivity() {
      */
     private fun sendData() {
         // Note : Here, we could imagine sending the data to the server,
-        // waiting for a response and then updating the UI.
+        // waiting for a response and then updating the UI
+        // TODO : send data to the server
+        // TODO : rapport - possibilité d'envoyer directement si on a de la connexion, utiliser une liste fifo,  gérer les différents cas de connexion (serveur inateignable, erreur serveur, ...)
         stringsToSend.forEach { logs.add(it) }
         adapter.notifyDataSetChanged()
         stringsToSend.clear()

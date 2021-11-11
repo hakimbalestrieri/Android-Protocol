@@ -9,6 +9,16 @@ import ch.heigvd.databinding.ActivitySerializationBinding
 import ch.heigvd.serialization.protobuf.DirectoryOuterClass
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
+import org.w3c.dom.Document
+import org.w3c.dom.DocumentType
+import org.w3c.dom.Element
+import java.io.StringWriter
+import javax.xml.parsers.DocumentBuilder
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.transform.OutputKeys
+import javax.xml.transform.TransformerFactory
+import javax.xml.transform.dom.DOMSource
+import javax.xml.transform.stream.StreamResult
 
 /**
  * Activity in which is realized the point of the laboratory about serialization
@@ -16,7 +26,6 @@ import kotlinx.serialization.encodeToString
  */
 class SerializationActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySerializationBinding
-    private var directory = Directory()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,13 +57,50 @@ class SerializationActivity : AppCompatActivity() {
 
         // Adding listener on button to send XML data
         binding.btnSendXML.setOnClickListener {
+            val person = getXMLPerson()
+            val docBuilder : DocumentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+            val document = docBuilder.newDocument()
+            val rootElement = document.createElement("directory")
+            val personElement = document.createElement("person")
+            val nameElement = document.createElement("name")
+            nameElement.appendChild(document.createTextNode(person.name))
+            personElement.appendChild(nameElement)
+            val firstnameElement = document.createElement("firstname")
+            firstnameElement.appendChild(document.createTextNode(person.firstname))
+            personElement.appendChild(firstnameElement)
+            val middlenameElement = document.createElement("middlename")
+            middlenameElement.appendChild(document.createTextNode(person.middlename))
+            personElement.appendChild(middlenameElement)
+            val homePhoneElement = document.createElement("phone")
+            homePhoneElement.setAttribute("type", "home")
+            person.phone.forEach {
+                val phoneElement = document.createElement("phone")
+                phoneElement.setAttribute("type", it.type.type)
+                phoneElement.appendChild(document.createTextNode(it.number))
+                personElement.appendChild(phoneElement)
+            }
+            rootElement.appendChild(personElement)
+            document.appendChild(rootElement)
+
+            val doctype: DocumentType = document.implementation.createDocumentType(
+                "ONMETQUOIICI",
+                "ONMETQUOIICI",
+                "http://mobile.iict.ch/directory.dtd",
+            )
+
+            val transformer = TransformerFactory.newInstance().newTransformer()
+            transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, doctype.systemId)
+            val outWriter = StringWriter()
+            val result = StreamResult( outWriter )
+            transformer.transform( DOMSource(document), result )
+            val sb = outWriter.buffer
+            val finalstring = sb.toString()
             if (validateForm()) {
-                val person = getXMLPerson()
-                directory.people.add(person)
-                val xml = getString(R.string.xml_header) + directory.serializeToXML()
+
+                val xml = finalstring
                 SymComManager(object : CommunicationEventListener {
                     override fun handleServerResponse(response: String) {
-                        val directory = Directory.parseXML(response)
+
                     }
                 }).sendRequest(
                     getString(R.string.api_xml),
