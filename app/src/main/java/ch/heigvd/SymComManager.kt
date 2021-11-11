@@ -18,6 +18,51 @@ import java.util.zip.InflaterInputStream
  */
 class SymComManager(var communicationEventListener: CommunicationEventListener) {
 
+
+    /**
+     * Send request text to the server designated by url
+     * @param url where to send the request
+     * @param request text to send
+     * @param contentType content type of the request body
+     * @param headers additional headers
+     */
+    fun sendRequest(
+        url: String,
+        request: ByteArray,
+        contentType: String,
+    ) {
+        val handler = Handler(Looper.getMainLooper())
+        Thread {
+            // Connection configuration
+            val connection = URL(url).openConnection() as HttpURLConnection
+            connection.requestMethod = "POST"
+            connection.doOutput = true
+            connection.doInput = true
+
+            // Headers of the request
+            //val postData: ByteArray = request.toByteArray(StandardCharsets.UTF_8)
+            connection.setRequestProperty("charset", "utf-8")
+            connection.setRequestProperty("Content-Type", contentType)
+
+            // Send the bytes
+            var outputStream = BufferedOutputStream(connection.outputStream)
+            outputStream.write(request)
+            outputStream.close()
+
+            // Check if the request was handled successfully
+            if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+
+                // Read body of the response
+                var inputStream = DataInputStream(connection.inputStream) as InputStream
+
+                var result = inputStream.readBytes()
+
+                // Send back the data to the activity
+                handler.post { communicationEventListener.handleServerResponse(result.toString()) }
+            }
+        }.start()
+    }
+
     /**
      * Send request text to the server designated by url
      * @param url where to send the request

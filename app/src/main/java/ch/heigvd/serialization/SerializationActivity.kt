@@ -2,9 +2,7 @@ package ch.heigvd.serialization
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import ch.heigvd.CommunicationEventListener
-import ch.heigvd.R
-import ch.heigvd.SymComManager
+import ch.heigvd.*
 import ch.heigvd.databinding.ActivitySerializationBinding
 import ch.heigvd.serialization.protobuf.DirectoryOuterClass
 import kotlinx.serialization.json.Json
@@ -68,44 +66,90 @@ class SerializationActivity : AppCompatActivity() {
         // Adding listener on button to send Protobuf data
         binding.btnSendAsProtoBuf.setOnClickListener {
 
-            val person = getXMLPerson() //TODO : getXML ? getString plutôt non ?
-
-            val protobufOut = DirectoryOuterClass.Person.newBuilder().setFirstname(person.firstname)
-                .setMiddlename(person.middlename).setName(person.name)
-
-
-            var typeProtobuf : DirectoryOuterClass.Phone.Type
-            typeProtobuf = DirectoryOuterClass.Phone.Type.HOME //Demande une init
-
-            for(i in person.phone) {
-
-                when (i.type.toString()) {
-                    "home" ->  typeProtobuf = DirectoryOuterClass.Phone.Type.HOME
-                    "mobile" -> typeProtobuf = DirectoryOuterClass.Phone.Type.MOBILE
-                    "work" -> typeProtobuf = DirectoryOuterClass.Phone.Type.WORK
-                }
-
-                protobufOut.addPhoneBuilder().setNumber(i.number).setType(typeProtobuf)
-            }
-
-            //Affichage
-            println(protobufOut.build())
-
-            SymComManager(object : CommunicationEventListener {
-                override fun handleServerResponse(response: String) {
-                    //val directory = Directory.parseXML(response)
-                    println(response);
+            SymComManagerProtobuf(object : CommunicationEventListenerProtobuf {
+                override fun handleServerResponseByteArray(response: ByteArray) {
+                    unserializeProtobuf(response)
                 }
             }).sendRequest(
                 getString(R.string.api_protobuf),
-                protobufOut.build().toString(),
+                serializeProtobuf(),
                 "application/protobuf"
             )
             resetForm()
-
         }
 
     }
+
+
+    /**
+     * Deserialize Protobuf
+     *
+     */
+    private fun unserializeProtobuf(input : ByteArray){
+
+        var inputProtobuf = DirectoryOuterClass.Directory.newBuilder().mergeFrom(input);
+        var personProtobuf = inputProtobuf.getResults(0)
+
+
+        var name = personProtobuf.name
+        var firstname = personProtobuf.firstname
+        var middlename = personProtobuf.middlename
+
+        val phones : MutableList<Phone> = mutableListOf()
+
+        for (phone in personProtobuf.phoneList){
+
+            val type = phone.type
+
+            var typeTxt = Phone.Type.home
+
+            when (type) {
+                DirectoryOuterClass.Phone.Type.HOME -> typeTxt = Phone.Type.home
+                DirectoryOuterClass.Phone.Type.MOBILE -> typeTxt = Phone.Type.mobile
+                DirectoryOuterClass.Phone.Type.WORK ->  typeTxt = Phone.Type.work
+            }
+
+            var phoneIn = Phone(typeTxt,phone.number)
+            phones.add(phoneIn)
+        }
+
+        val person = Person(personProtobuf.name,personProtobuf.firstname,personProtobuf.middlename,phones)
+
+        binding.txtResult.text = person.toString()
+    }
+
+
+    /**
+     * Serialize Protobuf
+     * Return a biteArray
+     */
+    private fun serializeProtobuf() : ByteArray {
+
+
+        val person = getXMLPerson() //TODO : getXML ? getString plutôt non ?
+
+        val protobufPerson = DirectoryOuterClass.Person.newBuilder().setFirstname(person.firstname)
+            .setMiddlename(person.middlename).setName(person.name)
+
+        var typeProtobuf : DirectoryOuterClass.Phone.Type
+        typeProtobuf = DirectoryOuterClass.Phone.Type.HOME //Demande une init
+
+        for(i in person.phone) {
+
+            //TODO : Faire des vérifs
+            when (i.type.toString()) {
+                "home" ->  typeProtobuf = DirectoryOuterClass.Phone.Type.HOME
+                "mobile" -> typeProtobuf = DirectoryOuterClass.Phone.Type.MOBILE
+                "work" -> typeProtobuf = DirectoryOuterClass.Phone.Type.WORK
+            }
+            protobufPerson.addPhoneBuilder().setNumber(i.number).setType(typeProtobuf)
+
+
+        }
+        var protobufDirectory = DirectoryOuterClass.Directory.newBuilder().addResults(protobufPerson).build().toByteArray()
+        return protobufDirectory
+    }
+
 
     /**
      * Validate that required fields are not empty
