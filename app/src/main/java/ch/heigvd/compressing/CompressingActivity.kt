@@ -24,8 +24,8 @@ class CompressingActivity : AppCompatActivity() {
 
         // Handle response of SymComManager and update UI
         val mcm = SymComManager(object : CommunicationEventListener {
-            override fun handleServerResponse(response: String) {
-                binding.txtResult.text = response
+            override fun handleServerResponse(response: Any) {
+                binding.txtResult.text = response as String
             }
         })
 
@@ -33,12 +33,14 @@ class CompressingActivity : AppCompatActivity() {
         binding.btnSend.setOnClickListener {
             val text = binding.tbxText.text.toString()
             if (text != "") {
-                mcm.sendRequest(
+                mcm.sendCompressedRequest(
                     getString(R.string.api_txt),
                     text,
-                    "text/plain",
-                    mapOf("X-Network" to "CSD", "X-Content-Encoding" to "deflate"),
-                    true
+                    mapOf(
+                        "content-type" to "text/plain",
+                        "X-Network" to "CSD",
+                        "X-Content-Encoding" to "deflate"
+                    ),
                 )
                 binding.tbxText.text.clear()
             }

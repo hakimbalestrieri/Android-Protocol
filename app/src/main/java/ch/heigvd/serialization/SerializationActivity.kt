@@ -11,6 +11,7 @@ import org.w3c.dom.Document
 import org.w3c.dom.DocumentType
 import org.w3c.dom.Element
 import java.io.StringWriter
+import java.lang.Exception
 import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.OutputKeys
@@ -36,9 +37,14 @@ class SerializationActivity : AppCompatActivity() {
         // Adding listener on button to send JSON data
         binding.btnSendAsJSON.setOnClickListener {
             SymComManager(object : CommunicationEventListener {
-                override fun handleServerResponse(response: String) {
-                    val result = Json.decodeFromString(SimplePerson.serializer(), response)
-                    binding.txtResult.text = result.toString()
+                override fun handleServerResponse(response: Any) {
+                    try {
+                        val result =
+                            Json.decodeFromString(SimplePerson.serializer(), response as String)
+                        binding.txtResult.text = result.toString()
+                    } catch (exception: Exception) {
+                        binding.txtResult.text = exception.message
+                    }
                 }
             }).sendRequest(
                 getString(R.string.api_json),
@@ -48,7 +54,7 @@ class SerializationActivity : AppCompatActivity() {
                         binding.tbxFirstName.text.toString()
                     )
                 ),
-                "application/json"
+                mapOf("content-type" to "application/json")
             )
             resetForm()
         }
@@ -56,7 +62,8 @@ class SerializationActivity : AppCompatActivity() {
         // Adding listener on button to send XML data
         binding.btnSendXML.setOnClickListener {
             val person = getXMLPerson()
-            val docBuilder : DocumentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+            val docBuilder: DocumentBuilder =
+                DocumentBuilderFactory.newInstance().newDocumentBuilder()
             val document = docBuilder.newDocument()
             val rootElement = document.createElement("directory")
             val personElement = document.createElement("person")
@@ -89,21 +96,24 @@ class SerializationActivity : AppCompatActivity() {
             val transformer = TransformerFactory.newInstance().newTransformer()
             transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, doctype.systemId)
             val outWriter = StringWriter()
-            val result = StreamResult( outWriter )
-            transformer.transform( DOMSource(document), result )
+            val result = StreamResult(outWriter)
+            transformer.transform(DOMSource(document), result)
             val sb = outWriter.buffer
             val finalstring = sb.toString()
             if (validateForm()) {
-
-                val xml = finalstring
                 SymComManager(object : CommunicationEventListener {
-                    override fun handleServerResponse(response: String) {
+                    override fun handleServerResponse(response: Any) {
+                        try {
 
+                        } catch (exception: Exception) {
+                            binding.txtResult.text = exception.message
+                        }
                     }
+
                 }).sendRequest(
                     getString(R.string.api_xml),
-                    xml,
-                    "application/xml"
+                    sb.toString(),
+                    mapOf("content-type" to "application/xml")
                 )
             }
             resetForm()
@@ -111,15 +121,18 @@ class SerializationActivity : AppCompatActivity() {
 
         // Adding listener on button to send Protobuf data
         binding.btnSendAsProtoBuf.setOnClickListener {
-
-            SymComManagerProtobuf(object : CommunicationEventListenerProtobuf {
-                override fun handleServerResponseByteArray(response: ByteArray) {
-                    unserializeProtobuf(response)
+            SymComManager(object : CommunicationEventListener {
+                override fun handleServerResponse(response: Any) {
+                    try {
+                        unserializeProtobuf(response as ByteArray)
+                    } catch (exception: Exception) {
+                        binding.txtResult.text = exception.message
+                    }
                 }
             }).sendRequest(
                 getString(R.string.api_protobuf),
                 serializeProtobuf(),
-                "application/protobuf"
+                mapOf("content-type" to "application/protobuf")
             )
             resetForm()
         }
@@ -131,7 +144,12 @@ class SerializationActivity : AppCompatActivity() {
      * Deserialize Protobuf
      *
      */
-    private fun unserializeProtobuf(input : ByteArray){
+
+    /**
+     * Deserialize with protobuf syntax a given byte array
+     * @param input to deserialize
+     */
+    private fun unserializeProtobuf(input: ByteArray) {
 
         var inputProtobuf = DirectoryOuterClass.Directory.newBuilder().mergeFrom(input);
         var personProtobuf = inputProtobuf.getResults(0)
@@ -141,9 +159,9 @@ class SerializationActivity : AppCompatActivity() {
         var firstname = personProtobuf.firstname
         var middlename = personProtobuf.middlename
 
-        val phones : MutableList<Phone> = mutableListOf()
+        val phones: MutableList<Phone> = mutableListOf()
 
-        for (phone in personProtobuf.phoneList){
+        for (phone in personProtobuf.phoneList) {
 
             val type = phone.type
 
@@ -152,14 +170,15 @@ class SerializationActivity : AppCompatActivity() {
             when (type) {
                 DirectoryOuterClass.Phone.Type.HOME -> typeTxt = Phone.Type.home
                 DirectoryOuterClass.Phone.Type.MOBILE -> typeTxt = Phone.Type.mobile
-                DirectoryOuterClass.Phone.Type.WORK ->  typeTxt = Phone.Type.work
+                DirectoryOuterClass.Phone.Type.WORK -> typeTxt = Phone.Type.work
             }
 
-            var phoneIn = Phone(typeTxt,phone.number)
+            var phoneIn = Phone(typeTxt, phone.number)
             phones.add(phoneIn)
         }
 
-        val person = Person(personProtobuf.name,personProtobuf.firstname,personProtobuf.middlename,phones)
+        val person =
+            Person(personProtobuf.name, personProtobuf.firstname, personProtobuf.middlename, phones)
 
         binding.txtResult.text = person.toString()
     }
@@ -169,7 +188,7 @@ class SerializationActivity : AppCompatActivity() {
      * Serialize Protobuf
      * Return a biteArray
      */
-    private fun serializeProtobuf() : ByteArray {
+    private fun serializeProtobuf(): ByteArray {
 
 
         val person = getXMLPerson() //TODO : getXML ? getString plutôt non ?
@@ -177,14 +196,14 @@ class SerializationActivity : AppCompatActivity() {
         val protobufPerson = DirectoryOuterClass.Person.newBuilder().setFirstname(person.firstname)
             .setMiddlename(person.middlename).setName(person.name)
 
-        var typeProtobuf : DirectoryOuterClass.Phone.Type
+        var typeProtobuf: DirectoryOuterClass.Phone.Type
         typeProtobuf = DirectoryOuterClass.Phone.Type.HOME //Demande une init
 
-        for(i in person.phone) {
+        for (i in person.phone) {
 
             //TODO : Faire des vérifs
             when (i.type.toString()) {
-                "home" ->  typeProtobuf = DirectoryOuterClass.Phone.Type.HOME
+                "home" -> typeProtobuf = DirectoryOuterClass.Phone.Type.HOME
                 "mobile" -> typeProtobuf = DirectoryOuterClass.Phone.Type.MOBILE
                 "work" -> typeProtobuf = DirectoryOuterClass.Phone.Type.WORK
             }
@@ -192,7 +211,9 @@ class SerializationActivity : AppCompatActivity() {
 
 
         }
-        var protobufDirectory = DirectoryOuterClass.Directory.newBuilder().addResults(protobufPerson).build().toByteArray()
+        var protobufDirectory =
+            DirectoryOuterClass.Directory.newBuilder().addResults(protobufPerson).build()
+                .toByteArray()
         return protobufDirectory
     }
 
@@ -224,6 +245,7 @@ class SerializationActivity : AppCompatActivity() {
 
     /**
      * Get the person matching form data
+     * @return a Person object read to be serialized
      */
     private fun getXMLPerson(): Person {
         // Data retrieval

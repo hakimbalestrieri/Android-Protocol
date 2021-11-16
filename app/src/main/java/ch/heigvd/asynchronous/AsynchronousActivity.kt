@@ -24,8 +24,8 @@ class AsynchronousActivity : AppCompatActivity() {
 
         // Handle response of SymComManager and update UI
         val mcm = SymComManager(object : CommunicationEventListener {
-            override fun handleServerResponse(response: String) {
-                binding.txtResult.text = response
+            override fun handleServerResponse(response: Any) {
+                binding.txtResult.text = response as String
             }
         })
 
@@ -33,7 +33,11 @@ class AsynchronousActivity : AppCompatActivity() {
         binding.btnSend.setOnClickListener {
             val text = binding.tbxText.text.toString()
             if (text != "") {
-                mcm.sendRequest(getString(R.string.api_txt), text, "text/plain")
+                mcm.sendRequest(
+                    getString(R.string.api_txt),
+                    text,
+                    mapOf("content-type" to "text/plain")
+                )
                 binding.tbxText.text.clear()
             }
         }
