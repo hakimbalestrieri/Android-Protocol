@@ -1,6 +1,9 @@
 package ch.heigvd.graphql
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -99,6 +102,8 @@ class GraphQLActivity : AppCompatActivity() {
                 )
             }
         } catch (exception: Exception) {
+            Log.d(TAG, "Books can't be parsed")
+            exception.message?.let { Log.d(TAG, it) }
             books.clear()
         }
         booksAdapter.notifyDataSetChanged()
@@ -118,8 +123,14 @@ class GraphQLActivity : AppCompatActivity() {
                 authors.add(Json.decodeFromJsonElement(Author.serializer(), it))
             }
         } catch (exception: Exception) {
+            Log.d(TAG, "Authors can't be parsed")
+            exception.message?.let { Log.d(TAG, it) }
             authors.clear()
         }
         authorsAdapter.notifyDataSetChanged()
+    }
+
+    companion object {
+        private val TAG = GraphQLActivity::class.java.simpleName
     }
 }

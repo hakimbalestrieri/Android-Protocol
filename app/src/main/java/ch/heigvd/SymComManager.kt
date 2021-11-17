@@ -63,7 +63,6 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
         request: String,
         headers: Map<String, String>? = null,
     ) {
-        val handler = Handler(Looper.getMainLooper())
         Thread {
             send(url, headers, {
                 val outputStream = OutputStreamWriter(
@@ -79,7 +78,7 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
                 )
                 val sb = StringBuilder()
                 inputStream.forEachLine { line -> sb.append(line) }
-                handler.post { communicationEventListener.handleServerResponse(sb.toString()) }
+                HANDLER.post { communicationEventListener.handleServerResponse(sb.toString()) }
             })
         }.start()
     }
@@ -95,7 +94,6 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
         request: ByteArray,
         headers: Map<String, String>? = null,
     ) {
-        val handler = Handler(Looper.getMainLooper())
         Thread {
             send(url, headers, {
                 val outputStream = BufferedOutputStream(it)
@@ -103,7 +101,7 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
                 outputStream.close()
             }, {
                 val inputStream = BufferedInputStream(it)
-                handler.post { communicationEventListener.handleServerResponse(inputStream.readBytes()) }
+                HANDLER.post { communicationEventListener.handleServerResponse(inputStream.readBytes()) }
             })
         }.start()
     }
@@ -119,7 +117,6 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
         request: String,
         headers: Map<String, String>? = null,
     ) {
-        val handler = Handler(Looper.getMainLooper())
         Thread {
             send(url, headers, {
                 val outputStream = OutputStreamWriter(
@@ -138,8 +135,12 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
                 )
                 val sb = StringBuilder()
                 inputStream.forEachLine { line -> sb.append(line) }
-                handler.post { communicationEventListener.handleServerResponse(sb.toString()) }
+                HANDLER.post { communicationEventListener.handleServerResponse(sb.toString()) }
             })
         }.start()
+    }
+
+    companion object {
+        private val HANDLER = Handler(Looper.getMainLooper())
     }
 }

@@ -5,18 +5,17 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
+import ch.heigvd.CommunicationEventListener
 import ch.heigvd.R
+import ch.heigvd.SymComManager
 import ch.heigvd.databinding.ActivityDeferredBinding
+import kotlin.math.log
 
 /**
  * Activity in which is realized the point of the laboratory about the deferred transmissions
  * @author Allemann, Balestrieri, Gomes
  */
 class DeferredActivity : AppCompatActivity() {
-    companion object {
-        private const val TIMER_DELAY: Long = 10000
-    }
-
     private lateinit var binding: ActivityDeferredBinding
     private val stringsToSend = mutableListOf<String>()
     private val logs = mutableListOf<String>()
@@ -61,12 +60,28 @@ class DeferredActivity : AppCompatActivity() {
      * Send the data
      */
     private fun sendData() {
-        // Note : Here, we could imagine sending the data to the server,
-        // waiting for a response and then updating the UI
-        // TODO : send data to the server
-        // TODO : rapport - possibilité d'envoyer directement si on a de la connexion, utiliser une liste fifo,  gérer les différents cas de connexion (serveur inateignable, erreur serveur, ...)
-        stringsToSend.forEach { logs.add(it) }
-        adapter.notifyDataSetChanged()
+        // Handle response of SymComManager and update UI
+        val mcm = SymComManager(object : CommunicationEventListener {
+            override fun handleServerResponse(response: Any) {
+                logs.add(response as String)
+                adapter.notifyDataSetChanged()
+            }
+        })
+
+        // Send data to the server
+        // Note: Here we open one connection per data item to be transmitted.
+        // We could have used multiplexing and sent all the data in one request
+        stringsToSend.forEach {
+            mcm.sendRequest(
+                getString(R.string.api_txt),
+                it,
+                mapOf("content-type" to "text/plain")
+            )
+        }
         stringsToSend.clear()
+    }
+
+    companion object {
+        private const val TIMER_DELAY: Long = 10 * 1000L
     }
 }

@@ -2,14 +2,13 @@ package ch.heigvd.serialization
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import ch.heigvd.*
 import ch.heigvd.databinding.ActivitySerializationBinding
 import ch.heigvd.serialization.protobuf.DirectoryOuterClass
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
-import org.w3c.dom.Document
 import org.w3c.dom.DocumentType
-import org.w3c.dom.Element
 import java.io.StringWriter
 import java.lang.Exception
 import javax.xml.parsers.DocumentBuilder
@@ -36,83 +35,47 @@ class SerializationActivity : AppCompatActivity() {
 
         // Adding listener on button to send JSON data
         binding.btnSendAsJSON.setOnClickListener {
-            SymComManager(object : CommunicationEventListener {
-                override fun handleServerResponse(response: Any) {
-                    try {
-                        val result =
-                            Json.decodeFromString(SimplePerson.serializer(), response as String)
-                        binding.txtResult.text = result.toString()
-                    } catch (exception: Exception) {
-                        binding.txtResult.text = exception.message
+            if (validateForm()) {
+                val directory = Directory(mutableListOf(getPersonToSend()))
+                SymComManager(object : CommunicationEventListener {
+                    override fun handleServerResponse(response: Any) {
+                        try {
+                            val directory =
+                                Json.decodeFromString(Directory.serializer(), response as String)
+                            binding.txtResult.text = directory.people.toString()
+                        } catch (exception: Exception) {
+                            exception.message?.let { it1 -> Log.d(TAG, it1) }
+                            binding.txtResult.text = "An error occurred, check debug logs"
+                        }
                     }
-                }
-            }).sendRequest(
-                getString(R.string.api_json),
-                Json.encodeToString(
-                    SimplePerson(
-                        binding.tbxName.text.toString(),
-                        binding.tbxFirstName.text.toString()
-                    )
-                ),
-                mapOf("content-type" to "application/json")
-            )
-            resetForm()
+                }).sendRequest(
+                    getString(R.string.api_json),
+                    Json.encodeToString(directory),
+                    mapOf("content-type" to "application/json")
+                )
+                resetForm()
+            }
+
         }
 
         // Adding listener on button to send XML data
         binding.btnSendXML.setOnClickListener {
-            val person = getXMLPerson()
-            val docBuilder: DocumentBuilder =
-                DocumentBuilderFactory.newInstance().newDocumentBuilder()
-            val document = docBuilder.newDocument()
-            val rootElement = document.createElement("directory")
-            val personElement = document.createElement("person")
-            val nameElement = document.createElement("name")
-            nameElement.appendChild(document.createTextNode(person.name))
-            personElement.appendChild(nameElement)
-            val firstnameElement = document.createElement("firstname")
-            firstnameElement.appendChild(document.createTextNode(person.firstname))
-            personElement.appendChild(firstnameElement)
-            val middlenameElement = document.createElement("middlename")
-            middlenameElement.appendChild(document.createTextNode(person.middlename))
-            personElement.appendChild(middlenameElement)
-            val homePhoneElement = document.createElement("phone")
-            homePhoneElement.setAttribute("type", "home")
-            person.phone.forEach {
-                val phoneElement = document.createElement("phone")
-                phoneElement.setAttribute("type", it.type.type)
-                phoneElement.appendChild(document.createTextNode(it.number))
-                personElement.appendChild(phoneElement)
-            }
-            rootElement.appendChild(personElement)
-            document.appendChild(rootElement)
-
-            val doctype: DocumentType = document.implementation.createDocumentType(
-                "ONMETQUOIICI",
-                "ONMETQUOIICI",
-                "http://mobile.iict.ch/directory.dtd",
-            )
-
-            val transformer = TransformerFactory.newInstance().newTransformer()
-            transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, doctype.systemId)
-            val outWriter = StringWriter()
-            val result = StreamResult(outWriter)
-            transformer.transform(DOMSource(document), result)
-            val sb = outWriter.buffer
-            val finalstring = sb.toString()
             if (validateForm()) {
+                val directory = Directory(mutableListOf(getPersonToSend()))
                 SymComManager(object : CommunicationEventListener {
                     override fun handleServerResponse(response: Any) {
                         try {
-
+                            val directory = Directory.deserializeXML(response as String)
+                            binding.txtResult.text = directory.people.toString()
                         } catch (exception: Exception) {
-                            binding.txtResult.text = exception.message
+                            exception.message?.let { it1 -> Log.d(TAG, it1) }
+                            binding.txtResult.text = "An error occurred, check debug logs"
                         }
                     }
 
                 }).sendRequest(
                     getString(R.string.api_xml),
-                    sb.toString(),
+                    Directory.serializeAsXML(directory),
                     mapOf("content-type" to "application/xml")
                 )
             }
@@ -121,102 +84,27 @@ class SerializationActivity : AppCompatActivity() {
 
         // Adding listener on button to send Protobuf data
         binding.btnSendAsProtoBuf.setOnClickListener {
-            SymComManager(object : CommunicationEventListener {
-                override fun handleServerResponse(response: Any) {
-                    try {
-                        unserializeProtobuf(response as ByteArray)
-                    } catch (exception: Exception) {
-                        binding.txtResult.text = exception.message
+            if (validateForm()) {
+                val directory = Directory(mutableListOf(getPersonToSend()))
+                SymComManager(object : CommunicationEventListener {
+                    override fun handleServerResponse(response: Any) {
+                        try {
+                            val directory = Directory.deserializeProtobuf(response as ByteArray)
+                            binding.txtResult.text = directory.people.toString()
+                        } catch (exception: Exception) {
+                            exception.message?.let { it1 -> Log.d(TAG, it1) }
+                            binding.txtResult.text = "An error occurred, check debug logs"
+                        }
                     }
-                }
-            }).sendRequest(
-                getString(R.string.api_protobuf),
-                serializeProtobuf(),
-                mapOf("content-type" to "application/protobuf")
-            )
-            resetForm()
-        }
-
-    }
-
-
-    /**
-     * Deserialize Protobuf
-     *
-     */
-
-    /**
-     * Deserialize with protobuf syntax a given byte array
-     * @param input to deserialize
-     */
-    private fun unserializeProtobuf(input: ByteArray) {
-
-        var inputProtobuf = DirectoryOuterClass.Directory.newBuilder().mergeFrom(input);
-        var personProtobuf = inputProtobuf.getResults(0)
-
-
-        var name = personProtobuf.name
-        var firstname = personProtobuf.firstname
-        var middlename = personProtobuf.middlename
-
-        val phones: MutableList<Phone> = mutableListOf()
-
-        for (phone in personProtobuf.phoneList) {
-
-            val type = phone.type
-
-            var typeTxt = Phone.Type.home
-
-            when (type) {
-                DirectoryOuterClass.Phone.Type.HOME -> typeTxt = Phone.Type.home
-                DirectoryOuterClass.Phone.Type.MOBILE -> typeTxt = Phone.Type.mobile
-                DirectoryOuterClass.Phone.Type.WORK -> typeTxt = Phone.Type.work
+                }).sendRequest(
+                    getString(R.string.api_protobuf),
+                    Directory.serializeAsProtoBuf(directory),
+                    mapOf("content-type" to "application/protobuf")
+                )
+                resetForm()
             }
-
-            var phoneIn = Phone(typeTxt, phone.number)
-            phones.add(phoneIn)
         }
-
-        val person =
-            Person(personProtobuf.name, personProtobuf.firstname, personProtobuf.middlename, phones)
-
-        binding.txtResult.text = person.toString()
     }
-
-
-    /**
-     * Serialize Protobuf
-     * Return a biteArray
-     */
-    private fun serializeProtobuf(): ByteArray {
-
-
-        val person = getXMLPerson() //TODO : getXML ? getString plutôt non ?
-
-        val protobufPerson = DirectoryOuterClass.Person.newBuilder().setFirstname(person.firstname)
-            .setMiddlename(person.middlename).setName(person.name)
-
-        var typeProtobuf: DirectoryOuterClass.Phone.Type
-        typeProtobuf = DirectoryOuterClass.Phone.Type.HOME //Demande une init
-
-        for (i in person.phone) {
-
-            //TODO : Faire des vérifs
-            when (i.type.toString()) {
-                "home" -> typeProtobuf = DirectoryOuterClass.Phone.Type.HOME
-                "mobile" -> typeProtobuf = DirectoryOuterClass.Phone.Type.MOBILE
-                "work" -> typeProtobuf = DirectoryOuterClass.Phone.Type.WORK
-            }
-            protobufPerson.addPhoneBuilder().setNumber(i.number).setType(typeProtobuf)
-
-
-        }
-        var protobufDirectory =
-            DirectoryOuterClass.Directory.newBuilder().addResults(protobufPerson).build()
-                .toByteArray()
-        return protobufDirectory
-    }
-
 
     /**
      * Validate that required fields are not empty
@@ -245,28 +133,27 @@ class SerializationActivity : AppCompatActivity() {
 
     /**
      * Get the person matching form data
-     * @return a Person object read to be serialized
+     * @return a Person object ready to be serialized
      */
-    private fun getXMLPerson(): Person {
+    private fun getPersonToSend(): Person {
         // Data retrieval
-        val middlename = binding.tbxMiddleName.text.toString()
         val homeNumber = binding.tbxHomeNumber.text.toString()
         val mobileNumber = binding.tbxMobileNumber.text.toString()
         val workNumber = binding.tbxWorkNumber.text.toString()
 
-        // Form is well filled, return person
+        // Get phone numbers
         val phones = mutableListOf<Phone>()
-        val homePhone = if (homeNumber == "") null else Phone(Phone.Type.home, homeNumber)
+        val homePhone = if (homeNumber == "") null else Phone(Phone.Type.HOME, homeNumber)
         if (homePhone != null) phones.add(homePhone)
-        val mobilePhone = if (mobileNumber == "") null else Phone(Phone.Type.mobile, mobileNumber)
+        val mobilePhone = if (mobileNumber == "") null else Phone(Phone.Type.MOBILE, mobileNumber)
         if (mobilePhone != null) phones.add(mobilePhone)
-        val workPhone = if (workNumber == "") null else Phone(Phone.Type.work, workNumber)
+        val workPhone = if (workNumber == "") null else Phone(Phone.Type.WORK, workNumber)
         if (workPhone != null) phones.add(workPhone)
 
         return Person(
             binding.tbxName.text.toString(),
             binding.tbxFirstName.text.toString(),
-            if (middlename == "") null else middlename,
+            binding.tbxMiddleName.text.toString(),
             phones.toList()
         )
     }
@@ -281,5 +168,9 @@ class SerializationActivity : AppCompatActivity() {
         binding.tbxHomeNumber.text.clear()
         binding.tbxMobileNumber.text.clear()
         binding.tbxWorkNumber.text.clear()
+    }
+
+    companion object {
+        private val TAG = SerializationActivity::class.java.simpleName
     }
 }
