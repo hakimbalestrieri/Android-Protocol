@@ -13,8 +13,8 @@ data class Person(
     var middlename: String,
     var phone: List<Phone>
 ) {
-    companion object {
-        fun serializeAsProtoBuf(person: Person): DirectoryOuterClass.Person.Builder? {
+    companion object : OwnSerializable<Person, DirectoryOuterClass.Person.Builder> {
+        override fun serializeAsProtoBuf(person: Person): DirectoryOuterClass.Person.Builder {
             val protobufPerson = DirectoryOuterClass.Person.newBuilder()
                 .setFirstname(person.firstname)
                 .setMiddlename(person.middlename)
@@ -23,11 +23,11 @@ data class Person(
             return protobufPerson
         }
 
-        fun deserializeProtobuf(personProtoBuf: DirectoryOuterClass.Person.Builder): Person {
+        override fun deserializeProtobuf(personProtoBuf: DirectoryOuterClass.Person.Builder): Person {
             val phones: MutableList<Phone> = mutableListOf()
             personProtoBuf.phoneList.forEach {
                 if (it != null)
-                    phones.add(Phone.deserializeProtobuf(it!!))
+                    phones.add(Phone.deserializeProtobuf(it.toBuilder()))
             }
             return Person(
                 personProtoBuf.name,
@@ -37,12 +37,12 @@ data class Person(
             )
         }
 
-        fun serializeAsXML(person: Person): String {
+        override fun serializeAsXML(person: Person): String {
             return "TODO"
         }
 
-        fun deserializeXML(xml: String): Person {
-            return Person("", "","", mutableListOf())
+        override fun deserializeXML(xml: String): Person {
+            return Person("", "", "", mutableListOf())
         }
     }
 }
