@@ -62,6 +62,24 @@ class SerializationActivity : AppCompatActivity() {
         binding.btnSendXML.setOnClickListener {
             if (validateForm()) {
                 val directory = Directory(mutableListOf(getPersonToSend()))
+
+                // Generate XML document
+                val docBuilder: DocumentBuilder =
+                    DocumentBuilderFactory.newInstance().newDocumentBuilder()
+                val document = docBuilder.newDocument()
+                val directoryXML = Directory.serializeAsXML(directory, document)
+                document.appendChild(directoryXML)
+
+                // Transform document to XML
+                val transformer = TransformerFactory.newInstance().newTransformer()
+                transformer.setOutputProperty(
+                    OutputKeys.DOCTYPE_SYSTEM,
+                    getString(R.string.api_dtd_url)
+                )
+                val outWriter = StringWriter()
+                transformer.transform(DOMSource(document), StreamResult(StringWriter()))
+
+                // Send request
                 SymComManager(object : CommunicationEventListener {
                     override fun handleServerResponse(response: Any) {
                         try {
@@ -75,7 +93,7 @@ class SerializationActivity : AppCompatActivity() {
 
                 }).sendRequest(
                     getString(R.string.api_xml),
-                    Directory.serializeAsXML(directory),
+                    outWriter.buffer.toString(),
                     mapOf("content-type" to "application/xml")
                 )
             }

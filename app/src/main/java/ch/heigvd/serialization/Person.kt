@@ -2,6 +2,10 @@ package ch.heigvd.serialization
 
 import ch.heigvd.serialization.protobuf.DirectoryOuterClass
 import kotlinx.serialization.Serializable
+import org.w3c.dom.Document
+import org.w3c.dom.Element
+import javax.xml.parsers.DocumentBuilder
+import javax.xml.parsers.DocumentBuilderFactory
 
 /**
  * Data class to define a person
@@ -37,8 +41,21 @@ data class Person(
             )
         }
 
-        override fun serializeAsXML(person: Person): String {
-            return "TODO"
+        override fun serializeAsXML(person: Person, document : Document): Element {
+            val personElement = document.createElement("person")
+            val nameElement = document.createElement("name")
+            nameElement.appendChild(document.createTextNode(person.name))
+            personElement.appendChild(nameElement)
+            val firstnameElement = document.createElement("firstname")
+            firstnameElement.appendChild(document.createTextNode(person.firstname))
+            personElement.appendChild(firstnameElement)
+            val middlenameElement = document.createElement("middlename")
+            middlenameElement.appendChild(document.createTextNode(person.middlename))
+            personElement.appendChild(middlenameElement)
+            person.phone.forEach {
+                personElement.appendChild(Phone.serializeAsXML(it, document))
+            }
+            return personElement
         }
 
         override fun deserializeXML(xml: String): Person {

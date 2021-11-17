@@ -5,6 +5,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Serializer
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import org.w3c.dom.Document
+import org.w3c.dom.Element
+import javax.xml.parsers.DocumentBuilder
+import javax.xml.parsers.DocumentBuilderFactory
 
 /**
  * Data class to define a phone
@@ -39,8 +43,11 @@ data class Phone(var type: Type, var number: String) {
             return Phone(Type.values()[phoneProtobuf.type.ordinal], phoneProtobuf.number)
         }
 
-        override fun serializeAsXML(phone: Phone): String {
-            return "TODO"
+        override fun serializeAsXML(phone: Phone, document : Document): Element {
+            val phoneElement = document.createElement("phone")
+            phoneElement.setAttribute("type", phone.type.name.lowercase())
+            phoneElement.appendChild(document.createTextNode(phone.number))
+            return phoneElement
         }
 
         override fun deserializeXML(xml: String): Phone {
