@@ -7,6 +7,7 @@ import org.w3c.dom.Element
 
 /**
  * Data class to define a person
+ * @author Allemann, Balestrieri, Gomes
  */
 @Serializable
 data class Person(

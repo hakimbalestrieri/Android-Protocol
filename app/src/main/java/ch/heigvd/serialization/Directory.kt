@@ -9,6 +9,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 
 /**
  * Data class to define a directory
+ * @author Allemann, Balestrieri, Gomes
  */
 @Serializable
 data class Directory(

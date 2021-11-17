@@ -12,6 +12,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 
 /**
  * Data class to define a phone
+ * @author Allemann, Balestrieri, Gomes
  */
 @Serializable
 data class Phone(var type: Type, var number: String) {
