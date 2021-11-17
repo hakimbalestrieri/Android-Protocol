@@ -4,8 +4,6 @@ import ch.heigvd.serialization.protobuf.DirectoryOuterClass
 import kotlinx.serialization.Serializable
 import org.w3c.dom.Document
 import org.w3c.dom.Element
-import javax.xml.parsers.DocumentBuilder
-import javax.xml.parsers.DocumentBuilderFactory
 
 /**
  * Data class to define a person
@@ -41,7 +39,7 @@ data class Person(
             )
         }
 
-        override fun serializeAsXML(person: Person, document : Document): Element {
+        override fun serializeAsXML(person: Person, document: Document): Element {
             val personElement = document.createElement("person")
             val nameElement = document.createElement("name")
             nameElement.appendChild(document.createTextNode(person.name))
@@ -58,8 +56,25 @@ data class Person(
             return personElement
         }
 
-        override fun deserializeXML(xml: String): Person {
-            return Person("", "", "", mutableListOf())
+        override fun deserializeXML(element: Element): Person {
+            val phoneElements = element.getElementsByTagName("phone")
+            val phones: MutableList<Phone> = mutableListOf()
+            for (i in 0 until phoneElements.length)
+                phones.add(
+                    Phone.deserializeXML(
+                        phoneElements.item(i) as Element
+                    )
+                )
+
+            val nameElements = element.getElementsByTagName("name").item(0)
+            val firstnameElements = element.getElementsByTagName("firstname").item(0)
+            val middlenameElements = element.getElementsByTagName("middlename").item(0)
+            return Person(
+                if (nameElements.childNodes.length > 0) nameElements.firstChild.nodeValue else "",
+                if (firstnameElements.childNodes.length > 0) firstnameElements.firstChild.nodeValue else "",
+                if (middlenameElements.childNodes.length > 0) middlenameElements.firstChild.nodeValue else "",
+                phones
+            )
         }
     }
 }

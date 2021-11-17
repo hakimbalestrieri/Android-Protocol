@@ -7,5 +7,5 @@ interface OwnSerializable<X, Y> {
     fun serializeAsProtoBuf(valueToSerialize: X): Y
     fun deserializeProtobuf(valueToDeserialize: Y): X
     fun serializeAsXML(valueToDeserialize: X, document : Document): Element
-    fun deserializeXML(valueToDeserialize: String): X
+    fun deserializeXML(element: Element): X
 }

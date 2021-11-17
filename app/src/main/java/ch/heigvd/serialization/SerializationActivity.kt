@@ -17,6 +17,10 @@ import javax.xml.transform.OutputKeys
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
+import android.R.xml
+import org.xml.sax.InputSource
+import java.io.StringReader
+
 
 /**
  * Activity in which is realized the point of the laboratory about serialization
@@ -77,20 +81,23 @@ class SerializationActivity : AppCompatActivity() {
                     getString(R.string.api_dtd_url)
                 )
                 val outWriter = StringWriter()
-                transformer.transform(DOMSource(document), StreamResult(StringWriter()))
+                transformer.transform(DOMSource(document), StreamResult(outWriter))
 
                 // Send request
                 SymComManager(object : CommunicationEventListener {
                     override fun handleServerResponse(response: Any) {
                         try {
-                            val directory = Directory.deserializeXML(response as String)
+                            val docBuilder: DocumentBuilder =
+                                DocumentBuilderFactory.newInstance().newDocumentBuilder()
+                            val ins = InputSource(StringReader((response as String).trim()))
+                            val document = docBuilder.parse(ins)
+                            val directory = Directory.deserializeXML(document.documentElement)
                             binding.txtResult.text = directory.people.toString()
                         } catch (exception: Exception) {
                             exception.message?.let { it1 -> Log.d(TAG, it1) }
                             binding.txtResult.text = "An error occurred, check debug logs"
                         }
                     }
-
                 }).sendRequest(
                     getString(R.string.api_xml),
                     outWriter.buffer.toString(),

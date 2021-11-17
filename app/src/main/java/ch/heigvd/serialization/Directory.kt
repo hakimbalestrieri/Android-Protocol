@@ -33,7 +33,7 @@ data class Directory(
             return Directory(people)
         }
 
-        override fun serializeAsXML(directory: Directory, document : Document): Element {
+        override fun serializeAsXML(directory: Directory, document: Document): Element {
             val directoryElement = document.createElement("directory")
             directory.people.forEach {
                 directoryElement.appendChild(Person.serializeAsXML(it, document))
@@ -41,8 +41,14 @@ data class Directory(
             return directoryElement
         }
 
-        override fun deserializeXML(xml: String): Directory {
-            return Directory(mutableListOf())
+        override fun deserializeXML(element: Element): Directory {
+            val peopleElements = element.getElementsByTagName("person")
+            val people: MutableList<Person> = mutableListOf()
+            for (i in 0 until peopleElements.length) {
+                val current = peopleElements.item(i)
+                people.add(Person.deserializeXML(current as Element))
+            }
+            return Directory(people)
         }
     }
 }

@@ -50,8 +50,9 @@ data class Phone(var type: Type, var number: String) {
             return phoneElement
         }
 
-        override fun deserializeXML(xml: String): Phone {
-            return Phone(Type.WORK, "")
+        override fun deserializeXML(element: Element): Phone {
+            val type = Type.valueOf(element.getAttribute("type").uppercase())
+            return Phone(type, element.firstChild.nodeValue)
         }
     }
 }
