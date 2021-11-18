@@ -18,7 +18,7 @@ La méthode `SendRequest` de la classe `SymComManager` est appelée en passant un 
 
 Un Handler permet de gérer un envoi des données toutes les 10 secondes. Une liste de string permet de stocker en mémoire les données à envoyer. 
 
-> TODO : Envoyer avec une seule connexion TCP ? Assurer l'ordre d'envoi des données?
+Il serait intéressant d'appliquer du multiplexage pour l'envoi des données afin d'éviter d'ouvrir autant de connexion TCP qu'il y a de données à envoyer.
 
 Le stockage des données en mémoire n'est pas très adapté pour un cas d'application concret. En effet, si l'activité est détruite ou l'application fermée alors l'envoi n'aura jamais lieu. De plus, il serait plus adapté de stocker le cache à envoyer dans une base de donnée locale embarquée (par exemple SQLite).
 

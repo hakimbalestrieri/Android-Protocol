@@ -103,7 +103,6 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
         requests: List<String>,
         headers: Map<String, String>?
     ) {
-        // TODO : Send with the same connection ?
         requests.forEach { sendRequest(url, it, headers) }
     }
 
