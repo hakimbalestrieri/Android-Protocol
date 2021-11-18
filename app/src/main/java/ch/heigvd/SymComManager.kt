@@ -2,6 +2,7 @@ package ch.heigvd
 
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import java.io.*
 import java.lang.StringBuilder
 import java.net.HttpURLConnection
@@ -32,23 +33,28 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
         write: (outputStream: OutputStream) -> Unit,
         read: (inputStream: InputStream) -> Unit,
     ) {
-        // Connection configuration
-        val connection = URL(url).openConnection() as HttpURLConnection
-        connection.requestMethod = "POST"
-        connection.doOutput = true
-        connection.doInput = true
+        try{
+            // Connection configuration
+            val connection = URL(url).openConnection() as HttpURLConnection
+            connection.requestMethod = "POST"
+            connection.doOutput = true
+            connection.doInput = true
 
-        // Adding headers
-        headers?.forEach { (k, v) -> connection.setRequestProperty(k, v) }
+            // Adding headers
+            headers?.forEach { (k, v) -> connection.setRequestProperty(k, v) }
 
-        // Sending the request
-        write(connection.outputStream)
+            // Sending the request
+            write(connection.outputStream)
 
-        // Check if the request was handled successfully
-        if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+            // Check if the request was handled successfully
+            if (connection.responseCode == HttpURLConnection.HTTP_OK) {
 
-            // Read body of the response
-            read(connection.inputStream)
+                // Read body of the response
+                read(connection.inputStream)
+            }
+        }
+        catch (exception : Exception){
+            exception.message?.let { Log.d(SymComManager::class::simpleName.toString(), it) }
         }
     }
 
