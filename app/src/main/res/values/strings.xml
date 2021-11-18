@@ -6,4 +6,9 @@
     <string name="api_protobuf">http://mobile.iict.ch/api/protobuf</string>
     <string name="api_graphql">http://mobile.iict.ch/graphql</string>
     <string name="api_dtd_url">http://mobile.iict.ch/directory.dtd</string>
+    <string name="error_occurred">An error occurred, check debug logs</string>
+    <string name="required_field">This field is required</string>
+    <string name="phone_required">At least one phone number has to be set</string>
+    <string name="error_parse_authors">Authors can\'t be parsed</string>
+    <string name="error_parse_books">Books can\'t be parsed</string>
 </resources>

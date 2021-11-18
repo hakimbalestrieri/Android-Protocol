@@ -30,7 +30,7 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
         url: String,
         headers: Map<String, String>? = null,
         write: (outputStream: OutputStream) -> Unit,
-        read: (inputStream: InputStream) -> Unit
+        read: (inputStream: InputStream) -> Unit,
     ) {
         // Connection configuration
         val connection = URL(url).openConnection() as HttpURLConnection
@@ -57,11 +57,13 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
      * @param url where to send the request
      * @param request text to send inside the body
      * @param headers map of headers to define
+     * @param connection used to send request, null if a new connection has to be established
      */
     fun sendRequest(
         url: String,
         request: String,
         headers: Map<String, String>? = null,
+        connection: HttpURLConnection? = null
     ) {
         Thread {
             send(url, headers, {
@@ -79,8 +81,24 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
                 val sb = StringBuilder()
                 inputStream.forEachLine { line -> sb.append(line) }
                 HANDLER.post { communicationEventListener.handleServerResponse(sb.toString()) }
+                inputStream.close()
             })
         }.start()
+    }
+
+    /**
+     * Send multiple requests to the server at the given URL
+     * @param url where to send the request
+     * @param requests list of text to send inside the body
+     * @param headers map of headers to define
+     */
+    fun sendRequests(
+        url: String,
+        requests: List<String>,
+        headers: Map<String, String>?
+    ) {
+        // TODO : Send with the same connection ?
+        requests.forEach { sendRequest(url, it, headers) }
     }
 
     /**
@@ -101,7 +119,9 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
                 outputStream.close()
             }, {
                 val inputStream = BufferedInputStream(it)
-                HANDLER.post { communicationEventListener.handleServerResponse(inputStream.readBytes()) }
+                val byteArray = inputStream.readBytes()
+                HANDLER.post { communicationEventListener.handleServerResponse(byteArray) }
+                inputStream.close()
             })
         }.start()
     }
@@ -136,6 +156,7 @@ class SymComManager(var communicationEventListener: CommunicationEventListener) 
                 val sb = StringBuilder()
                 inputStream.forEachLine { line -> sb.append(line) }
                 HANDLER.post { communicationEventListener.handleServerResponse(sb.toString()) }
+                inputStream.close()
             })
         }.start()
     }

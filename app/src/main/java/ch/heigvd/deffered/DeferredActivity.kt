@@ -60,25 +60,19 @@ class DeferredActivity : AppCompatActivity() {
      * Send the data
      */
     private fun sendData() {
-        // Handle response of SymComManager and update UI
-        val mcm = SymComManager(object : CommunicationEventListener {
-            override fun handleServerResponse(response: Any) {
-                logs.add(response as String)
-                adapter.notifyDataSetChanged()
-            }
-        })
-
-        // Send data to the server
-        // Note: Here we open one connection per data item to be transmitted.
-        // We could have used multiplexing and sent all the data in one request
-        stringsToSend.forEach {
-            mcm.sendRequest(
+        if (stringsToSend.size > 0) {
+            SymComManager(object : CommunicationEventListener {
+                override fun handleServerResponse(response: Any) {
+                    logs.add(response as String)
+                    adapter.notifyDataSetChanged()
+                }
+            }).sendRequests(
                 getString(R.string.api_txt),
-                it,
+                stringsToSend,
                 mapOf("content-type" to "text/plain")
             )
+            stringsToSend.clear()
         }
-        stringsToSend.clear()
     }
 
     companion object {

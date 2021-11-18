@@ -49,7 +49,7 @@ class SerializationActivity : AppCompatActivity() {
                             binding.txtResult.text = directory.people.toString()
                         } catch (exception: Exception) {
                             exception.message?.let { it1 -> Log.d(TAG, it1) }
-                            binding.txtResult.text = "An error occurred, check debug logs"
+                            binding.txtResult.text = getString(R.string.error_occurred)
                         }
                     }
                 }).sendRequest(
@@ -95,7 +95,7 @@ class SerializationActivity : AppCompatActivity() {
                             binding.txtResult.text = directory.people.toString()
                         } catch (exception: Exception) {
                             exception.message?.let { it1 -> Log.d(TAG, it1) }
-                            binding.txtResult.text = "An error occurred, check debug logs"
+                            binding.txtResult.text = getString(R.string.error_occurred)
                         }
                     }
                 }).sendRequest(
@@ -118,7 +118,7 @@ class SerializationActivity : AppCompatActivity() {
                             binding.txtResult.text = directory.people.toString()
                         } catch (exception: Exception) {
                             exception.message?.let { it1 -> Log.d(TAG, it1) }
-                            binding.txtResult.text = "An error occurred, check debug logs"
+                            binding.txtResult.text = getString(R.string.error_occurred)
                         }
                     }
                 }).sendRequest(
@@ -137,20 +137,20 @@ class SerializationActivity : AppCompatActivity() {
      */
     private fun validateForm(): Boolean {
         if (binding.tbxName.text.toString() == "") {
-            binding.tbxName.error = "This field is required"
+            binding.tbxName.error = getString(R.string.required_field)
             return false
         }
         if (binding.tbxFirstName.text.toString() == "") {
-            binding.tbxFirstName.error = "This field is required"
+            binding.tbxFirstName.error = getString(R.string.required_field)
             return false
         }
         if (binding.tbxHomeNumber.text.toString() == ""
             && binding.tbxMobileNumber.text.toString() == ""
             && binding.tbxWorkNumber.text.toString() == ""
         ) {
-            binding.tbxHomeNumber.error = "At least one phone number has to be set"
-            binding.tbxMobileNumber.error = "At least one phone number has to be set"
-            binding.tbxWorkNumber.error = "At least one phone number has to be set"
+            binding.tbxHomeNumber.error = getString(R.string.phone_required)
+            binding.tbxMobileNumber.error = getString(R.string.phone_required)
+            binding.tbxWorkNumber.error = getString(R.string.phone_required)
             return false
         }
         return true

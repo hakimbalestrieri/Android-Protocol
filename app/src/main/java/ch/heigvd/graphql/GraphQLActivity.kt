@@ -102,7 +102,7 @@ class GraphQLActivity : AppCompatActivity() {
                 )
             }
         } catch (exception: Exception) {
-            Log.d(TAG, "Books can't be parsed")
+            Log.d(TAG, getString(R.string.error_parse_books))
             exception.message?.let { Log.d(TAG, it) }
             books.clear()
         }
@@ -123,7 +123,7 @@ class GraphQLActivity : AppCompatActivity() {
                 authors.add(Json.decodeFromJsonElement(Author.serializer(), it))
             }
         } catch (exception: Exception) {
-            Log.d(TAG, "Authors can't be parsed")
+            Log.d(TAG, getString(R.string.error_parse_authors))
             exception.message?.let { Log.d(TAG, it) }
             authors.clear()
         }
