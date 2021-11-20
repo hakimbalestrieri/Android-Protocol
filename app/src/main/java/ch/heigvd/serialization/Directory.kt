@@ -4,8 +4,6 @@ import ch.heigvd.serialization.protobuf.DirectoryOuterClass
 import kotlinx.serialization.Serializable
 import org.w3c.dom.Document
 import org.w3c.dom.Element
-import javax.xml.parsers.DocumentBuilder
-import javax.xml.parsers.DocumentBuilderFactory
 
 /**
  * Data class to define a directory

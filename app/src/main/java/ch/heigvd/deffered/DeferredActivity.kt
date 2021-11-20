@@ -9,7 +9,6 @@ import ch.heigvd.CommunicationEventListener
 import ch.heigvd.R
 import ch.heigvd.SymComManager
 import ch.heigvd.databinding.ActivityDeferredBinding
-import kotlin.math.log
 
 /**
  * Activity in which is realized the point of the laboratory about the deferred transmissions
@@ -53,7 +52,7 @@ class DeferredActivity : AppCompatActivity() {
 
         // Add adapter to the list view
         adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, logs)
-        binding.listLogs.adapter = adapter;
+        binding.listLogs.adapter = adapter
     }
 
     /**

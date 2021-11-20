@@ -5,10 +5,8 @@ import android.os.Bundle
 import android.util.Log
 import ch.heigvd.*
 import ch.heigvd.databinding.ActivitySerializationBinding
-import ch.heigvd.serialization.protobuf.DirectoryOuterClass
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
-import org.w3c.dom.DocumentType
 import java.io.StringWriter
 import java.lang.Exception
 import javax.xml.parsers.DocumentBuilder
@@ -17,7 +15,6 @@ import javax.xml.transform.OutputKeys
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
-import android.R.xml
 import org.xml.sax.InputSource
 import java.io.StringReader
 
